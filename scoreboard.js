@@ -17,6 +17,10 @@ class Timer {
     start() {
         const self = this;
 
+        if (self.timerInterval) {
+            clearInterval(self.timerInterval);
+        }
+
         self.isPaused = false;
         self.timerElement.classList.add('text-green-500');
 
@@ -47,11 +51,33 @@ class Timer {
         this.timerElement.classList.remove('text-green-500');
     }
 
+    goldenScore() {
+        clearInterval(this.timerInterval);
+        this.timerTime = 0;
+        this.isPaused = true;
+        this.normalTimeFinished = true;
+        this.setElementTime(0);
+        this.goldenScoreElement.classList.remove('hidden');
+    }
+
     reset(minutes) {
+        if (this.normalTimeFinished) {
+            this.goldenScoreElement.classList.add('hidden');
+        }
         this.isPaused = true;
         this.normalTimeFinished = false;
+        this.setElementTime(minutes);
+    }
+
+    setElementTime(minutes) {
         this.timerTime = minutes * 60;
         this.timerElement.textContent = this.formatTime(this.timerTime);
+    }
+
+    checkIfScoreInGoldenScore() {
+        if (this.normalTimeFinished && !this.isPaused) {
+            this.pause();
+        }
     }
 
     playSound() {
@@ -89,11 +115,14 @@ class Osaekomi {
                 switch (this.osaekomiTime) {
                     case 5:
                         this.player.addYuko();
+                        this.checkIfScoreInGoldenScore();
                         break;
                     case 10:
                     case 20:
                         this.player.addWazari();
+                        this.checkIfScoreInGoldenScore();
                         break;
+                    default:
                 }
                 if (this.osaekomiTime >= 20 || this.player.ipponCount === 1) {
                     clearInterval(this.osaekomiInterval);
@@ -117,6 +146,13 @@ class Osaekomi {
         this.osaekomiInterval = null;
         this.isPaused = true;
     }
+
+    checkIfScoreInGoldenScore() {
+        if (this.timer.normalTimeFinished) {
+            this.pause();
+        }
+    }
+
 }
 
 class Player {
@@ -140,6 +176,7 @@ class Player {
             this.timer.pause();
             this.ipponCount = 1;
             this.updateElement(this.elements.ippon, this.ipponCount);
+            this.timer.checkIfScoreInGoldenScore();
         }
     }
 
@@ -165,6 +202,7 @@ class Player {
             this.updateElement(this.elements.ippon, this.ipponCount);
             this.updateElement(this.elements.wazari, 0);
         }
+        this.timer.checkIfScoreInGoldenScore();
     }
 
     removeWazari() {
@@ -182,6 +220,7 @@ class Player {
     addYuko() {
         this.yukoCount++;
         this.updateElement(this.elements.yuko, this.yukoCount);
+        this.timer.checkIfScoreInGoldenScore();
     }
 
     removeYuko() {
@@ -225,6 +264,7 @@ class Player {
                 break;
         }
     }
+
 }
 
 class EventManager {
@@ -354,6 +394,11 @@ class EventManager {
                         this.timer.reset(4);
                     }
                     break;
+                case 'Digit0':
+                    if (this.timer.isPaused) {
+                        this.timer.goldenScore();
+                    }
+                    break;
             }
         });
     }
@@ -385,4 +430,4 @@ const player2 = new Player(timer, true, {
 
 new EventManager(timer, player, player2);
 
-timer.reset(0.05)
+timer.reset(4)
