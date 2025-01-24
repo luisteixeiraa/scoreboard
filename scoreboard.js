@@ -272,7 +272,42 @@ class EventManager {
         this.timer = timer;
         this.player = player;
         this.player2 = player2;
+        this.winnerElement = document.getElementsByClassName("winnerElement")[0];
+        this.winnerPlayer = null;
         this.initEvents();
+    }
+
+    setWinner(isPlayer1) {
+
+        const player1Style = ['bg-slate-300'];
+        const player2Style = ['bg-blue-900', 'text-white'];
+        const textElement = this.winnerElement.getElementsByClassName("winnerText")[0];
+
+        if (isPlayer1) {
+            if (this.winnerPlayer === this.player) {
+                this.winnerPlayer = null;
+                this.winnerElement.classList.add('hidden');
+                this.winnerElement.classList.remove(...player1Style);
+            } else {
+                this.winnerPlayer = this.player;
+                textElement.textContent = "Atleta de Branco";
+                this.winnerElement.classList.remove('hidden');
+                this.winnerElement.classList.remove(...player2Style);
+                this.winnerElement.classList.add(...player1Style);
+            }
+        } else {
+            if (this.winnerPlayer === this.player2) {
+                this.winnerPlayer = null;
+                this.winnerElement.classList.add('hidden');
+                this.winnerElement.classList.remove(...player2Style);
+            } else {
+                this.winnerPlayer = this.player2;
+                textElement.textContent = "Atleta de Azul";
+                this.winnerElement.classList.remove('hidden');
+                this.winnerElement.classList.remove(...player1Style);
+                this.winnerElement.classList.add(...player2Style);
+            }
+        }
     }
 
     initEvents() {
@@ -312,21 +347,6 @@ class EventManager {
                         this.player2.removeIppon();
                     }
                     break;
-                case 'KeyT':
-                    if (this.player2.osaekomi.osaekomiInterval || this.player2.osaekomi.isPaused) {
-                        this.player2.osaekomi.stop();
-                    }
-                    if (!this.player.osaekomi.osaekomiInterval || this.player.osaekomi.isPaused) {
-                        this.player.osaekomi.start();
-                    } else {
-                        this.player.osaekomi.pause();
-                    }
-                    break;
-                case 'KeyG':
-                    if (this.player.osaekomi.osaekomiInterval || this.player.osaekomi.isPaused) {
-                        this.player.osaekomi.stop();
-                    }
-                    break;
                 // Player 2
                 case 'KeyY':
                     this.player2.addIppon();
@@ -358,21 +378,6 @@ class EventManager {
                         this.player.removeIppon();
                     }
                     break;
-                case 'KeyP':
-                    if (this.player.osaekomi.osaekomiInterval || this.player.osaekomi.isPaused) {
-                        this.player.osaekomi.stop();
-                    }
-                    if (!this.player2.osaekomi.osaekomiInterval || this.player2.osaekomi.isPaused) {
-                        this.player2.osaekomi.start();
-                    } else {
-                        this.player2.osaekomi.pause();
-                    }
-                    break;
-                case 'Semicolon':
-                    if (this.player2.osaekomi.osaekomiInterval || this.player2.osaekomi.isPaused) {
-                        this.player2.osaekomi.stop();
-                    }
-                    break;
                 // General
                 case 'Digit1':
                     if (this.timer.isPaused) {
@@ -394,10 +399,45 @@ class EventManager {
                         this.timer.reset(4);
                     }
                     break;
-                case 'Digit0':
+                case 'KeyB':
                     if (this.timer.isPaused) {
                         this.timer.goldenScore();
                     }
+                    break;
+                case 'ArrowLeft':
+                    if (this.player2.osaekomi.osaekomiInterval || this.player2.osaekomi.isPaused) {
+                        this.player2.osaekomi.stop();
+                    }
+                    if (!this.player.osaekomi.osaekomiInterval || this.player.osaekomi.isPaused) {
+                        this.player.osaekomi.start();
+                    } else {
+                        this.player.osaekomi.pause();
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (this.player.osaekomi.osaekomiInterval || this.player.osaekomi.isPaused) {
+                        this.player.osaekomi.stop();
+                    }
+                    if (!this.player2.osaekomi.osaekomiInterval || this.player2.osaekomi.isPaused) {
+                        this.player2.osaekomi.start();
+                    } else {
+                        this.player2.osaekomi.pause();
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (this.player.osaekomi.osaekomiInterval || this.player.osaekomi.isPaused) {
+                        this.player.osaekomi.stop();
+                    }
+                    if (this.player2.osaekomi.osaekomiInterval || this.player2.osaekomi.isPaused) {
+                        this.player2.osaekomi.stop();
+                    }
+                    break;
+                // Winners
+                case 'KeyV':
+                    this.setWinner(true);
+                    break;
+                case 'KeyN':
+                    this.setWinner(false);
                     break;
             }
         });
